@@ -61,7 +61,7 @@ public class UserController {
             oldUser.setEmail(newUser.getEmail());
             oldUser.setLogin(newUser.getLogin());
             oldUser.setBirthday(newUser.getBirthday());
-            if (newUser.getName() == null || newUser.getName().isBlank()){
+            if (newUser.getName() == null || newUser.getName().isBlank()) {
                 oldUser.setName(newUser.getLogin());
             } else {
                 oldUser.setName(newUser.getName());
