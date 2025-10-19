@@ -1,6 +1,8 @@
 package ru.yandex.practicum.filmorate.controller;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.exception.ConditionsNotMetException;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
@@ -20,13 +22,13 @@ public class FilmController {
     private final Map<Long, Film> films = new HashMap<>();
 
     @GetMapping
-    public Collection<Film> findAll() {
+    public ResponseEntity<Collection<Film>> findAll() {
         log.info("Получен запрос: GET /films (список всех фильмов)");
-        return films.values();
+        return ResponseEntity.ok(films.values());
     }
 
     @PostMapping
-    public Film create(@RequestBody Film film) {
+    public ResponseEntity<Film> create(@RequestBody Film film) {
         log.info("Получен запрос: POST /films — создание фильма {}", film.getName());
 
         if (!filmsValidation(film)) {
@@ -38,11 +40,11 @@ public class FilmController {
         // сохраняем новую публикацию в памяти приложения
         films.put(film.getId(), film);
         log.info("Фильм успешно создан: id={}, name={}", film.getId(), film.getName());
-        return film;
+        return ResponseEntity.status(HttpStatus.CREATED).body(film);
     }
 
     @PutMapping
-    public Film update(@RequestBody Film newFilm) {
+    public ResponseEntity<Film> update(@RequestBody Film newFilm) {
         log.info("Получен запрос: PUT /films — обновление фильма id={}", newFilm.getId());
         if (newFilm.getId() == null) {
             log.error("Попытка обновления без ID");
@@ -60,7 +62,7 @@ public class FilmController {
             oldFilm.setReleaseDate(newFilm.getReleaseDate());
             oldFilm.setDuration(newFilm.getDuration());
             log.info("Фильм успешно обновлён: id={}, name={}", newFilm.getId(), newFilm.getName());
-            return oldFilm;
+            return ResponseEntity.ok(oldFilm);
         }
         log.warn("Фильм с id={} не найден для обновления", newFilm.getId());
         throw new NotFoundException("Пост с id = " + newFilm.getId() + " не найден");

@@ -1,6 +1,8 @@
 package ru.yandex.practicum.filmorate.controller;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.exception.ConditionsNotMetException;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
@@ -20,13 +22,13 @@ public class UserController {
     private final Map<Long, User> users = new HashMap<>();
 
     @GetMapping
-    public Collection<User> findAll() {
+    public ResponseEntity<Collection<User>> findAll() {
         log.info("Получен запрос: GET /users (список всех пользователей)");
-        return users.values();
+        return ResponseEntity.ok(users.values());
     }
 
     @PostMapping
-    public User create(@RequestBody User user) {
+    public ResponseEntity<User> create(@RequestBody User user) {
         log.info("Получен запрос: POST /users — создание пользователя с email {}", user.getEmail());
         if (!userValidation(user)) {
             log.warn("Ошибка валидации при создании пользователя: {}", user);
@@ -41,11 +43,11 @@ public class UserController {
         // сохраняем новую публикацию в памяти приложения
         users.put(user.getId(), user);
         log.info("Пользователь успешно создан: id={}, login={}", user.getId(), user.getLogin());
-        return user;
+        return ResponseEntity.status(HttpStatus.CREATED).body(user);
     }
 
     @PutMapping
-    public User update(@RequestBody User newUser) {
+    public ResponseEntity<User> update(@RequestBody User newUser) {
         log.info("Получен запрос: PUT /users — обновление пользователя id={}", newUser.getId());
         if (newUser.getId() == null) {
             log.error("Попытка обновления пользователя без ID");
@@ -67,10 +69,10 @@ public class UserController {
                 oldUser.setName(newUser.getName());
             }
             log.info("Пользователь успешно обновлён: id={}, login={}", newUser.getId(), newUser.getLogin());
-            return oldUser;
+            return ResponseEntity.ok(oldUser);
         }
         log.warn("Пользователь с id={} не найден для обновления", newUser.getId());
-        throw new NotFoundException("Пост с id = " + newUser.getId() + " не найден");
+        throw new NotFoundException("Пользователь с id = " + newUser.getId() + " не найден");
     }
 
     // вспомогательный метод для генерации идентификатора нового поста
