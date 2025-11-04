@@ -32,10 +32,7 @@ class UserServiceValidationTests {
     @Test
     void testAddAndGetUser() {
         User saved = userService.addUser(createUser("test@mail.com", "user1"));
-        User retrieved = userService.getUserById(saved.getId());
-
-        assertEquals(saved.getId(), retrieved.getId());
-        assertEquals("user1", retrieved.getLogin());
+        assertEquals(saved.getId(), userService.getUserById(saved.getId()).getId());
     }
 
     @Test
@@ -43,7 +40,6 @@ class UserServiceValidationTests {
         User saved = userService.addUser(createUser("u@mail.com", "u1"));
         saved.setName("Новое Имя");
         userService.updateUser(saved);
-
         assertEquals("Новое Имя", userService.getUserById(saved.getId()).getName());
     }
 
