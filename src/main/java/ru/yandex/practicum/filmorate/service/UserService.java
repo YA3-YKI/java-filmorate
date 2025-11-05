@@ -1,5 +1,6 @@
 package ru.yandex.practicum.filmorate.service;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
@@ -8,6 +9,7 @@ import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 import java.time.LocalDate;
 import java.util.*;
 
+@Slf4j
 @Service
 public class UserService {
 
@@ -26,6 +28,7 @@ public class UserService {
     }
 
     public User addUser(User user) {
+        log.info("Добавление пользователя: {}", user.getLogin());
         validate(user);
         if (user.getName() == null || user.getName().isBlank()) {
             user.setName(user.getLogin());
@@ -42,6 +45,7 @@ public class UserService {
     }
 
     public void addFriend(Long userId, Long friendId) {
+        log.info("Добавление в друзья: {} → {}", userId, friendId);
         getUserById(userId).getFriends().add(friendId);
         getUserById(friendId).getFriends().add(userId);
     }

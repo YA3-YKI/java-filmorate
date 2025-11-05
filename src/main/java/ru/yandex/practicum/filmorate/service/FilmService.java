@@ -5,6 +5,7 @@ import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
+import lombok.extern.slf4j.Slf4j;
 
 import java.time.LocalDate;
 import java.util.Collection;
@@ -12,6 +13,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 public class FilmService {
 
@@ -32,6 +34,7 @@ public class FilmService {
     }
 
     public Film addFilm(Film film) {
+        log.info("Добавление фильма: {}", film.getName());
         validate(film);
         return filmStorage.add(film);
     }
@@ -42,14 +45,16 @@ public class FilmService {
     }
 
     public void addLike(Long filmId, Long userId) {
+        log.info("Пользователь {} лайкнул фильм {}", userId, filmId);
         Film film = getFilmById(filmId);
-        User user = userService.getUserById(userId); // ✅ Проверка существования пользователя
+        User user = userService.getUserById(userId);
         film.getLikes().add(user.getId());
     }
 
     public void removeLike(Long filmId, Long userId) {
+        log.info("Пользователь {} убрал лайк с фильма {}", userId, filmId);
         Film film = getFilmById(filmId);
-        User user = userService.getUserById(userId); // ✅ Проверка существования пользователя
+        User user = userService.getUserById(userId);
         film.getLikes().remove(user.getId());
     }
 
