@@ -14,5 +14,7 @@ public class Film {
     private LocalDate releaseDate;
     private Integer duration;
 
+    private MpaRating mpa;
+    private Set<String> genres = new HashSet<>();
     private Set<Long> likes = new HashSet<>();
 }
