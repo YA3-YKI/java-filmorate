@@ -40,6 +40,7 @@ class UserServiceValidationTests {
         User saved = userService.addUser(createUser("u@mail.com", "u1"));
         saved.setName("Новое Имя");
         userService.updateUser(saved);
+
         assertEquals("Новое Имя", userService.getUserById(saved.getId()).getName());
     }
 
@@ -49,10 +50,13 @@ class UserServiceValidationTests {
         User u2 = userService.addUser(createUser("2@mail.com", "u2"));
 
         userService.addFriend(u1.getId(), u2.getId());
-        assertTrue(userService.getFriends(u1.getId()).contains(u2));
+
+        List<User> friendsOfU1 = userService.getFriends(u1.getId());
+        assertEquals(1, friendsOfU1.size());
+        assertEquals(u2.getId(), friendsOfU1.get(0).getId());
 
         userService.removeFriend(u1.getId(), u2.getId());
-        assertFalse(userService.getFriends(u1.getId()).contains(u2));
+        assertTrue(userService.getFriends(u1.getId()).isEmpty());
     }
 
     @Test
@@ -65,7 +69,8 @@ class UserServiceValidationTests {
         userService.addFriend(u2.getId(), u3.getId());
 
         List<User> common = userService.getCommonFriends(u1.getId(), u2.getId());
+
         assertEquals(1, common.size());
-        assertEquals(u3.getId(), common.get(0).getId());
+        assertEquals(u3.getId(), common.getFirst().getId());
     }
 }
