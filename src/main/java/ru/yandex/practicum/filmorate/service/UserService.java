@@ -3,11 +3,14 @@ package ru.yandex.practicum.filmorate.service;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
+import ru.yandex.practicum.filmorate.model.FriendshipStatus;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 import java.time.LocalDate;
-import java.util.*;
+import java.util.Collection;
+import java.util.List;
+import java.util.Set;
 
 @Slf4j
 @Service
@@ -46,24 +49,36 @@ public class UserService {
 
     public void addFriend(Long userId, Long friendId) {
         log.info("Добавление в друзья: {} → {}", userId, friendId);
-        getUserById(userId).getFriends().add(friendId);
-        getUserById(friendId).getFriends().add(userId);
+
+        User user = getUserById(userId);
+        User friend = getUserById(friendId);
+
+        user.getFriends().put(friendId, FriendshipStatus.UNCONFIRMED);
+
+        friend.getFriends().put(userId, FriendshipStatus.CONFIRMED);
     }
 
     public void removeFriend(Long userId, Long friendId) {
-        getUserById(userId).getFriends().remove(friendId);
-        getUserById(friendId).getFriends().remove(userId);
+        User user = getUserById(userId);
+        User friend = getUserById(friendId);
+
+        user.getFriends().remove(friendId);
+        friend.getFriends().remove(userId);
     }
 
     public List<User> getFriends(Long userId) {
-        return getUserById(userId).getFriends().stream()
+        User user = getUserById(userId);
+
+        return user.getFriends().keySet().stream()
                 .map(this::getUserById)
                 .toList();
     }
 
     public List<User> getCommonFriends(Long userId, Long otherId) {
-        Set<Long> friends1 = getUserById(userId).getFriends();
-        Set<Long> friends2 = getUserById(otherId).getFriends();
+
+        Set<Long> friends1 = getUserById(userId).getFriends().keySet();
+        Set<Long> friends2 = getUserById(otherId).getFriends().keySet();
+
         return friends1.stream()
                 .filter(friends2::contains)
                 .map(this::getUserById)

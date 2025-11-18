@@ -47,8 +47,8 @@ class FilmServiceValidationTests {
     void testAddAndGetFilm() {
         Film film = createFilm("Фильм 1");
         Film saved = filmService.addFilm(film);
-        Film retrieved = filmService.getFilmById(saved.getId());
-        assertEquals(saved.getId(), retrieved.getId());
+
+        assertEquals(saved.getId(), filmService.getFilmById(saved.getId()).getId());
     }
 
     @Test
@@ -56,6 +56,7 @@ class FilmServiceValidationTests {
         Film saved = filmService.addFilm(createFilm("Фильм 2"));
         saved.setName("Новое имя");
         filmService.updateFilm(saved);
+
         assertEquals("Новое имя", filmService.getFilmById(saved.getId()).getName());
     }
 
@@ -86,9 +87,11 @@ class FilmServiceValidationTests {
 
         filmService.addLike(film.getId(), u1.getId());
         filmService.addLike(film.getId(), u2.getId());
+
         filmService.removeLike(film.getId(), u1.getId());
 
         List<Film> popular = filmService.getPopularFilms(5);
-        assertEquals(film.getId(), popular.get(0).getId());
+
+        assertEquals(film.getId(), popular.getFirst().getId());
     }
 }
