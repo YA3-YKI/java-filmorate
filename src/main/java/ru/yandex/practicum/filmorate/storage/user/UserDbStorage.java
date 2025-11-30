@@ -4,10 +4,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Component;
-import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import ru.yandex.practicum.filmorate.model.User;
+
 import java.util.Collection;
 
 @Component
