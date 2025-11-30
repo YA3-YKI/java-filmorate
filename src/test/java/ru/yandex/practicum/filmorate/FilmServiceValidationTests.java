@@ -4,6 +4,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.model.MpaRating;
 import ru.yandex.practicum.filmorate.service.FilmService;
 import ru.yandex.practicum.filmorate.service.UserService;
 import ru.yandex.practicum.filmorate.storage.film.InMemoryFilmStorage;
@@ -33,12 +34,14 @@ class FilmServiceValidationTests {
         film.setDescription("Description");
         film.setReleaseDate(LocalDate.of(2000, 1, 1));
         film.setDuration(120);
+        film.setMpa(MpaRating.G);  // enum
 
         Film savedFilm = filmService.addFilm(film);
         Film retrievedFilm = filmService.getFilmById(savedFilm.getId());
 
         assertEquals(savedFilm.getName(), retrievedFilm.getName());
         assertEquals(savedFilm.getDuration(), retrievedFilm.getDuration());
+        assertEquals(savedFilm.getMpa(), retrievedFilm.getMpa());
     }
 
     @Test
@@ -55,6 +58,7 @@ class FilmServiceValidationTests {
         film1.setDescription("Desc1");
         film1.setReleaseDate(LocalDate.of(2001, 1, 1));
         film1.setDuration(100);
+        film1.setMpa(MpaRating.PG);
         film1 = filmService.addFilm(film1);
 
         Film film2 = new Film();
@@ -62,6 +66,7 @@ class FilmServiceValidationTests {
         film2.setDescription("Desc2");
         film2.setReleaseDate(LocalDate.of(2002, 2, 2));
         film2.setDuration(120);
+        film2.setMpa(MpaRating.PG_13);
         film2 = filmService.addFilm(film2);
 
         filmService.addLike(film1.getId(), savedUser.getId());
@@ -84,6 +89,7 @@ class FilmServiceValidationTests {
         film.setDescription("DescX");
         film.setReleaseDate(LocalDate.of(2000, 1, 1));
         film.setDuration(90);
+        film.setMpa(MpaRating.G);
         film = filmService.addFilm(film);
 
         filmService.addLike(film.getId(), savedUser.getId());
