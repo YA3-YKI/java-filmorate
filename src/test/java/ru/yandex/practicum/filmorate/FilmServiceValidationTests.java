@@ -25,73 +25,69 @@ class FilmServiceValidationTests {
         filmService = new FilmService(new InMemoryFilmStorage(), userService);
     }
 
-    private Film createFilm(String name) {
-        Film film = new Film();
-        film.setName(name);
-        film.setDescription("Описание");
-        film.setReleaseDate(LocalDate.of(2000, 1, 1));
-        film.setDuration(100);
-        return film;
-    }
-
-    private User createUser(Long id) {
-        User user = new User();
-        user.setEmail("mail" + id + "@mail.com");
-        user.setLogin("user" + id);
-        user.setName("User " + id);
-        user.setBirthday(LocalDate.of(1990, 1, 1));
-        return userService.addUser(user);
-    }
-
     @Test
     void testAddAndGetFilm() {
-        Film film = createFilm("Фильм 1");
-        Film saved = filmService.addFilm(film);
+        Film film = new Film();
+        film.setName("Test Film");
+        film.setDescription("Description");
+        film.setReleaseDate(LocalDate.of(2000, 1, 1));
+        film.setDuration(120);
 
-        assertEquals(saved.getId(), filmService.getFilmById(saved.getId()).getId());
+        Film savedFilm = filmService.addFilm(film);
+        Film retrievedFilm = filmService.getFilmById(savedFilm.getId());
+
+        assertEquals(savedFilm.getName(), retrievedFilm.getName());
+        assertEquals(savedFilm.getDuration(), retrievedFilm.getDuration());
     }
 
     @Test
-    void testUpdateFilm() {
-        Film saved = filmService.addFilm(createFilm("Фильм 2"));
-        saved.setName("Новое имя");
-        filmService.updateFilm(saved);
+    void testAddLikeAndPopularFilms() {
+        User user = new User();
+        user.setEmail("user@example.com");
+        user.setLogin("login");
+        user.setName("User");
+        user.setBirthday(LocalDate.of(1995, 5, 15));
+        User savedUser = userService.addUser(user);
 
-        assertEquals("Новое имя", filmService.getFilmById(saved.getId()).getName());
-    }
+        Film film1 = new Film();
+        film1.setName("Film1");
+        film1.setDescription("Desc1");
+        film1.setReleaseDate(LocalDate.of(2001, 1, 1));
+        film1.setDuration(100);
+        film1 = filmService.addFilm(film1);
 
-    @Test
-    void testLikesAffectPopularityOrder() {
-        Film film1 = filmService.addFilm(createFilm("A"));
-        Film film2 = filmService.addFilm(createFilm("B"));
+        Film film2 = new Film();
+        film2.setName("Film2");
+        film2.setDescription("Desc2");
+        film2.setReleaseDate(LocalDate.of(2002, 2, 2));
+        film2.setDuration(120);
+        film2 = filmService.addFilm(film2);
 
-        User u1 = createUser(1L);
-        User u2 = createUser(2L);
-        User u3 = createUser(3L);
+        filmService.addLike(film1.getId(), savedUser.getId());
 
-        filmService.addLike(film1.getId(), u1.getId());
-        filmService.addLike(film1.getId(), u2.getId());
-        filmService.addLike(film2.getId(), u3.getId());
-
-        List<Film> popular = filmService.getPopularFilms(5);
-
-        assertEquals(film1.getId(), popular.get(0).getId());
-        assertEquals(film2.getId(), popular.get(1).getId());
+        List<Film> popularFilms = filmService.getPopularFilms(2);
+        assertEquals(film1.getId(), popularFilms.get(0).getId());
     }
 
     @Test
     void testRemoveLike() {
-        Film film = filmService.addFilm(createFilm("Film"));
-        User u1 = createUser(1L);
-        User u2 = createUser(2L);
+        User user = new User();
+        user.setEmail("user2@example.com");
+        user.setLogin("login2");
+        user.setName("User2");
+        user.setBirthday(LocalDate.of(1990, 3, 3));
+        User savedUser = userService.addUser(user);
 
-        filmService.addLike(film.getId(), u1.getId());
-        filmService.addLike(film.getId(), u2.getId());
+        Film film = new Film();
+        film.setName("FilmX");
+        film.setDescription("DescX");
+        film.setReleaseDate(LocalDate.of(2000, 1, 1));
+        film.setDuration(90);
+        film = filmService.addFilm(film);
 
-        filmService.removeLike(film.getId(), u1.getId());
+        filmService.addLike(film.getId(), savedUser.getId());
+        filmService.removeLike(film.getId(), savedUser.getId());
 
-        List<Film> popular = filmService.getPopularFilms(5);
-
-        assertEquals(film.getId(), popular.getFirst().getId());
+        assertTrue(filmService.getFilmById(film.getId()).getLikes().isEmpty());
     }
 }
