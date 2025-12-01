@@ -19,6 +19,9 @@
 
 	<properties>
 		<java.version>11</java.version>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<maven.compiler.source>${java.version}</maven.compiler.source>
+		<maven.compiler.target>${java.version}</maven.compiler.target>
 		<lombok.version>1.18.24</lombok.version>
 	</properties>
 
@@ -52,7 +55,7 @@
 			<scope>provided</scope>
 		</dependency>
 
-		<!-- Jackson для работы с LocalDate и датами -->
+		<!-- Jackson для LocalDate -->
 		<dependency>
 			<groupId>com.fasterxml.jackson.datatype</groupId>
 			<artifactId>jackson-datatype-jsr310</artifactId>
