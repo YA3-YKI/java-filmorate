@@ -7,7 +7,8 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class Genre {
-    private Long id;
-    private String name;
+public class Friendship {
+    private Long userId;
+    private Long friendId;
+    private boolean confirmed;
 }

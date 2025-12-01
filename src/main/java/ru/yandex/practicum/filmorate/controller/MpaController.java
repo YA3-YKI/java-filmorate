@@ -1,29 +1,29 @@
 package ru.yandex.practicum.filmorate.controller;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.web.bind.annotation.*;
+import ru.yandex.practicum.filmorate.model.Mpa;
+import ru.yandex.practicum.filmorate.service.MpaService;
 
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/mpa")
+@Slf4j
 @RequiredArgsConstructor
 public class MpaController {
-
-    private final JdbcTemplate jdbcTemplate;
+    private final MpaService mpaService;
 
     @GetMapping
-    public List<Map<String, Object>> getAll() {
-        return jdbcTemplate.queryForList("SELECT * FROM mpa ORDER BY id");
+    public List<Mpa> findAll() {
+        log.info("GET /mpa - получение всех рейтингов MPA");
+        return mpaService.findAll();
     }
 
     @GetMapping("/{id}")
-    public Map<String, Object> getById(@PathVariable int id) {
-        return jdbcTemplate.queryForMap("SELECT * FROM mpa WHERE id = ?", id);
+    public Mpa findById(@PathVariable Long id) {
+        log.info("GET /mpa/{} - получение рейтинга MPA", id);
+        return mpaService.findById(id);
     }
 }

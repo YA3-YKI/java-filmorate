@@ -1,29 +1,29 @@
 package ru.yandex.practicum.filmorate.controller;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.web.bind.annotation.*;
+import ru.yandex.practicum.filmorate.model.Genre;
+import ru.yandex.practicum.filmorate.service.GenreService;
 
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/genres")
+@Slf4j
 @RequiredArgsConstructor
 public class GenreController {
-
-    private final JdbcTemplate jdbcTemplate;
+    private final GenreService genreService;
 
     @GetMapping
-    public List<Map<String, Object>> getAll() {
-        return jdbcTemplate.queryForList("SELECT * FROM genres ORDER BY id");
+    public List<Genre> findAll() {
+        log.info("GET /genres - получение всех жанров");
+        return genreService.findAll();
     }
 
     @GetMapping("/{id}")
-    public Map<String, Object> getById(@PathVariable int id) {
-        return jdbcTemplate.queryForMap("SELECT * FROM genres WHERE id = ?", id);
+    public Genre findById(@PathVariable Long id) {
+        log.info("GET /genres/{} - получение жанра", id);
+        return genreService.findById(id);
     }
 }
