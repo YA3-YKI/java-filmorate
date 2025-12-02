@@ -3,6 +3,7 @@ package ru.yandex.practicum.filmorate.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
@@ -26,8 +27,7 @@ public class FilmService {
 
     public Film findById(Long id) {
         return filmStorage.findById(id)
-                .orElseThrow(() -> new ru.yandex.practicum.filmorate.exception.NotFoundException(
-                        "Фильм с ID " + id + " не найден"));
+                .orElseThrow(() -> new NotFoundException("Фильм с ID " + id + " не найден"));
     }
 
     public Film create(Film film) {
@@ -82,24 +82,21 @@ public class FilmService {
 
     private void validateMpaAndGenres(Film film) {
         // Валидация MPA
-        if (film.getMpa() != null && film.getMpa().getId() != null) {
-            try {
-                mpaService.findById(film.getMpa().getId());
-            } catch (ru.yandex.practicum.filmorate.exception.NotFoundException e) {
-                throw new ValidationException("Рейтинг MPA с ID " + film.getMpa().getId() + " не найден");
-            }
-        } else {
+        if (film.getMpa() == null || film.getMpa().getId() == null) {
             throw new ValidationException("Рейтинг MPA должен быть указан");
+        }
+
+        // Проверяем существование MPA
+        if (!mpaService.existsById(film.getMpa().getId())) {
+            throw new NotFoundException("Рейтинг MPA с ID " + film.getMpa().getId() + " не найден");
         }
 
         // Валидация жанров
         if (film.getGenres() != null) {
             for (Genre genre : film.getGenres()) {
                 if (genre.getId() != null) {
-                    try {
-                        genreService.findById(genre.getId());
-                    } catch (ru.yandex.practicum.filmorate.exception.NotFoundException e) {
-                        throw new ValidationException("Жанр с ID " + genre.getId() + " не найден");
+                    if (!genreService.existsById(genre.getId())) {
+                        throw new NotFoundException("Жанр с ID " + genre.getId() + " не найден");
                     }
                 }
             }

@@ -12,13 +12,13 @@ import javax.validation.ConstraintViolationException;
 public class ErrorHandler {
 
     @ExceptionHandler(NotFoundException.class)
-    @ResponseStatus(HttpStatus.NOT_FOUND)
+    @ResponseStatus(HttpStatus.NOT_FOUND)  // 404
     public ErrorResponse handleNotFoundException(NotFoundException e) {
         return new ErrorResponse(e.getMessage());
     }
 
     @ExceptionHandler(ValidationException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)  // Изменено с 400 на BAD_REQUEST
+    @ResponseStatus(HttpStatus.BAD_REQUEST)  // 400
     public ErrorResponse handleValidationException(ValidationException e) {
         return new ErrorResponse(e.getMessage());
     }
@@ -38,10 +38,9 @@ public class ErrorHandler {
     @ExceptionHandler(Exception.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ErrorResponse handleException(Exception e) {
-        return new ErrorResponse("Внутренняя ошибка сервера: " + e.getMessage());
+        return new ErrorResponse("Внутренняя ошибка сервера");
     }
 
-    // Внутренний класс для ответа с ошибкой
     @lombok.Data
     @lombok.AllArgsConstructor
     public static class ErrorResponse {

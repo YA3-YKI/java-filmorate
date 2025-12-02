@@ -22,7 +22,6 @@ public class MpaService {
                         "Рейтинг MPA с ID " + id + " не найден"));
     }
 
-    // Метод для проверки существования MPA
     public boolean existsById(Long id) {
         return mpaStorage.findById(id).isPresent();
     }

@@ -22,7 +22,6 @@ public class GenreService {
                         "Жанр с ID " + id + " не найден"));
     }
 
-    // Метод для проверки существования жанра
     public boolean existsById(Long id) {
         return genreStorage.findById(id).isPresent();
     }
