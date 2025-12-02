@@ -21,4 +21,9 @@ public class GenreService {
                 .orElseThrow(() -> new ru.yandex.practicum.filmorate.exception.NotFoundException(
                         "Жанр с ID " + id + " не найден"));
     }
+
+    // Метод для проверки существования жанра
+    public boolean existsById(Long id) {
+        return genreStorage.findById(id).isPresent();
+    }
 }

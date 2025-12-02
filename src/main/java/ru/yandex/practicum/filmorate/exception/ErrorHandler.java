@@ -1,7 +1,5 @@
 package ru.yandex.practicum.filmorate.exception;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -20,7 +18,7 @@ public class ErrorHandler {
     }
 
     @ExceptionHandler(ValidationException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)  // Изменено с 400 на BAD_REQUEST
     public ErrorResponse handleValidationException(ValidationException e) {
         return new ErrorResponse(e.getMessage());
     }
@@ -43,9 +41,10 @@ public class ErrorHandler {
         return new ErrorResponse("Внутренняя ошибка сервера: " + e.getMessage());
     }
 
-    @Data
-    @AllArgsConstructor
-    private static class ErrorResponse {
+    // Внутренний класс для ответа с ошибкой
+    @lombok.Data
+    @lombok.AllArgsConstructor
+    public static class ErrorResponse {
         private String error;
     }
 }
