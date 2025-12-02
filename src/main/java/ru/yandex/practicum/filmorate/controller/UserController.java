@@ -1,60 +1,75 @@
 package ru.yandex.practicum.filmorate.controller;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.UserService;
 
-import java.util.Collection;
+import javax.validation.Valid;
 import java.util.List;
 
 @RestController
 @RequestMapping("/users")
+@Slf4j
 @RequiredArgsConstructor
 public class UserController {
-
     private final UserService userService;
 
     @GetMapping
-    public ResponseEntity<Collection<User>> getAllUsers() {
-        return ResponseEntity.ok(userService.getAllUsers());
+    @ResponseStatus(HttpStatus.OK)
+    public List<User> findAll() {
+        log.info("GET /users - получение всех пользователей");
+        return userService.findAll();
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<User> getUser(@PathVariable Long id) {
-        return ResponseEntity.ok(userService.getUserById(id));
+    @ResponseStatus(HttpStatus.OK)
+    public User findById(@PathVariable Long id) {
+        log.info("GET /users/{} - получение пользователя", id);
+        return userService.findById(id);
     }
 
     @PostMapping
-    public ResponseEntity<User> addUser(@RequestBody User user) {
-        return ResponseEntity.ok(userService.addUser(user));
+    @ResponseStatus(HttpStatus.CREATED)
+    public User create(@Valid @RequestBody User user) {
+        log.info("POST /users - создание пользователя");
+        return userService.create(user);
     }
 
     @PutMapping
-    public ResponseEntity<User> updateUser(@RequestBody User user) {
-        return ResponseEntity.ok(userService.updateUser(user));
+    @ResponseStatus(HttpStatus.OK)
+    public User update(@Valid @RequestBody User user) {
+        log.info("PUT /users - обновление пользователя");
+        return userService.update(user);
     }
 
     @PutMapping("/{id}/friends/{friendId}")
-    public ResponseEntity<Void> addFriend(@PathVariable Long id, @PathVariable Long friendId) {
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void addFriend(@PathVariable Long id, @PathVariable Long friendId) {
+        log.info("PUT /users/{}/friends/{} - добавление друга", id, friendId);
         userService.addFriend(id, friendId);
-        return ResponseEntity.ok().build();
     }
 
     @DeleteMapping("/{id}/friends/{friendId}")
-    public ResponseEntity<Void> removeFriend(@PathVariable Long id, @PathVariable Long friendId) {
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void removeFriend(@PathVariable Long id, @PathVariable Long friendId) {
+        log.info("DELETE /users/{}/friends/{} - удаление друга", id, friendId);
         userService.removeFriend(id, friendId);
-        return ResponseEntity.ok().build();
     }
 
     @GetMapping("/{id}/friends")
-    public ResponseEntity<List<User>> getFriends(@PathVariable Long id) {
-        return ResponseEntity.ok(userService.getFriends(id));
+    @ResponseStatus(HttpStatus.OK)
+    public List<User> getFriends(@PathVariable Long id) {
+        log.info("GET /users/{}/friends - получение друзей", id);
+        return userService.getFriends(id);
     }
 
     @GetMapping("/{id}/friends/common/{otherId}")
-    public ResponseEntity<List<User>> getCommonFriends(@PathVariable Long id, @PathVariable Long otherId) {
-        return ResponseEntity.ok(userService.getCommonFriends(id, otherId));
+    @ResponseStatus(HttpStatus.OK)
+    public List<User> getCommonFriends(@PathVariable Long id, @PathVariable Long otherId) {
+        log.info("GET /users/{}/friends/common/{} - общие друзья", id, otherId);
+        return userService.getCommonFriends(id, otherId);
     }
 }

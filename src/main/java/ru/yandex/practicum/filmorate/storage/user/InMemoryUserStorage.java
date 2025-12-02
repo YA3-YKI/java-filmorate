@@ -1,44 +1,91 @@
 package ru.yandex.practicum.filmorate.storage.user;
 
-import org.springframework.stereotype.Component;
-import ru.yandex.practicum.filmorate.exception.NotFoundException;
+import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.model.User;
 
 import java.util.*;
 
-@Component
+@Repository
 public class InMemoryUserStorage implements UserStorage {
-
     private final Map<Long, User> users = new HashMap<>();
-    private long idCounter = 0;
+    private long idCounter = 1;
 
     @Override
-    public User add(User user) {
-        user.setId(++idCounter);
+    public List<User> findAll() {
+        return new ArrayList<>(users.values());
+    }
+
+    @Override
+    public Optional<User> findById(Long id) {
+        return Optional.ofNullable(users.get(id));
+    }
+
+    @Override
+    public User create(User user) {
+        user.setId(idCounter++);
         users.put(user.getId(), user);
         return user;
     }
 
     @Override
     public User update(User user) {
-        if (!users.containsKey(user.getId())) {
-            throw new NotFoundException("Пользователь с id=" + user.getId() + " не найден");
-        }
         users.put(user.getId(), user);
         return user;
     }
 
     @Override
-    public User getById(Long id) {
-        User user = users.get(id);
-        if (user == null) {
-            throw new NotFoundException("Пользователь с id=" + id + " не найден");
-        }
-        return user;
+    public void delete(Long id) {
+        users.remove(id);
     }
 
     @Override
-    public Collection<User> findAll() {
-        return users.values();
+    public void addFriend(Long userId, Long friendId) {
+        User user = users.get(userId);
+        User friend = users.get(friendId);
+        if (user != null && friend != null) {
+            user.getFriends().add(friendId);
+        }
+    }
+
+    @Override
+    public void removeFriend(Long userId, Long friendId) {
+        User user = users.get(userId);
+        if (user != null) {
+            user.getFriends().remove(friendId);
+        }
+    }
+
+    @Override
+    public List<User> getFriends(Long userId) {
+        User user = users.get(userId);
+        if (user == null) return List.of();
+
+        List<User> friends = new ArrayList<>();
+        for (Long friendId : user.getFriends()) {
+            User friend = users.get(friendId);
+            if (friend != null) {
+                friends.add(friend);
+            }
+        }
+        return friends;
+    }
+
+    @Override
+    public List<User> getCommonFriends(Long userId1, Long userId2) {
+        User user1 = users.get(userId1);
+        User user2 = users.get(userId2);
+        if (user1 == null || user2 == null) return List.of();
+
+        Set<Long> commonIds = new HashSet<>(user1.getFriends());
+        commonIds.retainAll(user2.getFriends());
+
+        List<User> commonFriends = new ArrayList<>();
+        for (Long id : commonIds) {
+            User friend = users.get(id);
+            if (friend != null) {
+                commonFriends.add(friend);
+            }
+        }
+        return commonFriends;
     }
 }

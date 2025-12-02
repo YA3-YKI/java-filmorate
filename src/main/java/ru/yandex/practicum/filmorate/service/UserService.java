@@ -1,46 +1,45 @@
 package ru.yandex.practicum.filmorate.service;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
-import ru.yandex.practicum.filmorate.model.FriendshipStatus;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 import java.time.LocalDate;
-import java.util.Collection;
 import java.util.List;
-import java.util.Set;
 
 @Slf4j
 @Service
+@RequiredArgsConstructor
 public class UserService {
-
     private final UserStorage userStorage;
 
-    public UserService(UserStorage userStorage) {
-        this.userStorage = userStorage;
-    }
-
-    public Collection<User> getAllUsers() {
+    public List<User> findAll() {
         return userStorage.findAll();
     }
 
-    public User getUserById(Long id) {
-        return userStorage.getById(id);
+    public User findById(Long id) {
+        return userStorage.findById(id)
+                .orElseThrow(() -> new ru.yandex.practicum.filmorate.exception.NotFoundException(
+                        "Пользователь с ID " + id + " не найден"));
     }
 
-    public User addUser(User user) {
-        log.info("Добавление пользователя: {}", user.getLogin());
-        validate(user);
+    public User create(User user) {
+        validateUser(user);
         if (user.getName() == null || user.getName().isBlank()) {
             user.setName(user.getLogin());
         }
-        return userStorage.add(user);
+        return userStorage.create(user);
     }
 
-    public User updateUser(User user) {
-        validate(user);
+    public User update(User user) {
+        if (user.getId() == null) {
+            throw new ValidationException("ID пользователя не может быть пустым");
+        }
+        findById(user.getId());
+        validateUser(user);
         if (user.getName() == null || user.getName().isBlank()) {
             user.setName(user.getLogin());
         }
@@ -48,49 +47,41 @@ public class UserService {
     }
 
     public void addFriend(Long userId, Long friendId) {
-        log.info("Добавление в друзья: {} → {}", userId, friendId);
+        User user = findById(userId);
+        User friend = findById(friendId);
 
-        User user = getUserById(userId);
-        User friend = getUserById(friendId);
-
-        user.getFriends().put(friendId, FriendshipStatus.UNCONFIRMED);
-
-        friend.getFriends().put(userId, FriendshipStatus.CONFIRMED);
+        if (userId.equals(friendId)) {
+            throw new ValidationException("Пользователь не может добавить себя в друзья");
+        }
+        userStorage.addFriend(userId, friendId);
     }
 
     public void removeFriend(Long userId, Long friendId) {
-        User user = getUserById(userId);
-        User friend = getUserById(friendId);
-
-        user.getFriends().remove(friendId);
-        friend.getFriends().remove(userId);
+        User user = findById(userId);
+        User friend = findById(friendId);
+        userStorage.removeFriend(userId, friendId);
     }
 
     public List<User> getFriends(Long userId) {
-        User user = getUserById(userId);
-
-        return user.getFriends().keySet().stream()
-                .map(this::getUserById)
-                .toList();
+        User user = findById(userId);
+        return userStorage.getFriends(userId);
     }
 
-    public List<User> getCommonFriends(Long userId, Long otherId) {
-
-        Set<Long> friends1 = getUserById(userId).getFriends().keySet();
-        Set<Long> friends2 = getUserById(otherId).getFriends().keySet();
-
-        return friends1.stream()
-                .filter(friends2::contains)
-                .map(this::getUserById)
-                .toList();
+    public List<User> getCommonFriends(Long userId1, Long userId2) {
+        User user1 = findById(userId1);
+        User user2 = findById(userId2);
+        return userStorage.getCommonFriends(userId1, userId2);
     }
 
-    private void validate(User user) {
-        if (user.getEmail() == null || user.getEmail().isBlank() || !user.getEmail().contains("@"))
-            throw new ValidationException("Email некорректен");
-        if (user.getLogin() == null || user.getLogin().isBlank() || user.getLogin().contains(" "))
-            throw new ValidationException("Логин некорректен: пробелы недопустимы");
-        if (user.getBirthday() == null || user.getBirthday().isAfter(LocalDate.now()))
+    private void validateUser(User user) {
+        if (user.getEmail() == null || user.getEmail().isBlank() || !user.getEmail().contains("@")) {
+            throw new ValidationException("Электронная почта не может быть пустой и должна содержать символ @");
+        }
+        if (user.getLogin() == null || user.getLogin().isBlank() || user.getLogin().contains(" ")) {
+            throw new ValidationException("Логин не может быть пустым и содержать пробелы");
+        }
+        if (user.getBirthday() != null && user.getBirthday().isAfter(LocalDate.now())) {
             throw new ValidationException("Дата рождения не может быть в будущем");
+        }
     }
 }
